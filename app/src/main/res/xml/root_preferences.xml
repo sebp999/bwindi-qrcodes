@@ -1,0 +1,21 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/messages_header">
+
+        <EditTextPreference
+            app:key="patientDatabaseURL"
+            app:title="Patient Database URL"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="imageServerURL"
+            app:title="Patient Image Server URL"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="deviceImageDir"
+            app:title="Image Directory (on this device)"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+</PreferenceScreen>
