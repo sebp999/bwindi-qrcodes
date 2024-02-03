@@ -38,8 +38,8 @@ public class BaseMenus extends AppCompatActivity {
 
     public void goToDatabase(){
         Log.e("xxx", "go to database");
-//        Intent switchActivityIntent = new Intent(BaseMenus.this, SyncData.class);
-//        startActivity(switchActivityIntent);
+        Intent switchActivityIntent = new Intent(BaseMenus.this, SyncData.class);
+        startActivity(switchActivityIntent);
     }
 
     public void goToSettings(){
