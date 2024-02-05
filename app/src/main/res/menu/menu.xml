@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menu_update"
-        android:icon="@drawable/baseline_sync_24"
+        android:icon="@drawable/outline_arrow_circle_down_24"
         android:title="Sync data"
         app:showAsAction="ifRoom"
         />
