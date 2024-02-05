@@ -28,4 +28,22 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+    <string name="subscription_expired">Subscription expired</string>
+    <string name="scan_another">Scan another</string>
+    <string name="patient_details">Patient Details</string>
+    <string name="number">Number</string>
+    <string name="household">Household</string>
+    <string name="gender">Gender</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="dob">DoB</string>
+    <string name="subscription_date">Subscription Date</string>
+    <string name="subscriptiondate">SubscriptionDate</string>
+    <string name="subscription_duration">Subscription Duration</string>
+    <string name="subscriptiondurn">SubscriptionDurn</string>
+    <string name="barcode_identified_nbut_member_not_in_database">Barcode identified, \nbut member not in database</string>
+    <string name="quicker_update_adds_the_members_who_have_a_subscription_starting_since_the_last_time_this_device_was_updated">Quicker update: adds the members who have a subscription starting since the last time this device was updated.</string>
+    <string name="fetch_all_patient_records_takes_a_few_minutes">Fetch all patient records. Takes a few minutes.</string>
+    <string name="full_sync">Full Sync</string>
+    <string name="update_sync">Update Sync</string>
+    <string name="cancel_updating">Cancel update</string>
 </resources>

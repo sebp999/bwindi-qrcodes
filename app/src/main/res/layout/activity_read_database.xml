@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Full Sync"
+        android:text="@string/full_sync"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,7 +21,7 @@
         android:id="@+id/updateSync"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Update Sync"
+        android:text="@string/update_sync"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintStart_toStartOf="@+id/displayData"
         app:layout_constraintTop_toBottomOf="@+id/displayData" />
@@ -31,7 +31,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:indeterminate="false"
         android:max="100"
@@ -51,12 +51,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
+    <Button
+        android:id="@+id/cancelUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/cancel_updating"
+        app:layout_constraintTop_toBottomOf="@id/updatedText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="8sp"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        />
+
     <TextView
         android:id="@+id/textView2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="Fetch all patient records.  Takes a few minutes."
+        android:text="@string/fetch_all_patient_records_takes_a_few_minutes"
         app:layout_constraintBottom_toBottomOf="@+id/displayData"
         app:layout_constraintStart_toEndOf="@+id/displayData"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,19 +81,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="Quicker update."
+        android:text="@string/quicker_update_adds_the_members_who_have_a_subscription_starting_since_the_last_time_this_device_was_updated"
         app:layout_constraintBottom_toBottomOf="@+id/updateSync"
         app:layout_constraintStart_toEndOf="@+id/updateSync"
         app:layout_constraintTop_toTopOf="@+id/updateSync"
         app:layout_constraintEnd_toEndOf="parent"
  />
 
-    <!--    <TextView-->
-<!--        android:id="@+id/textView"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text=" I think this will fill up to the amoiunt of text that is needed so that I don't need to make it multi line"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

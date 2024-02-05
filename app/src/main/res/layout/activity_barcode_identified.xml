@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/barcode_found_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ShowResult">
@@ -26,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:text="Patient Details"
+        android:text="@string/patient_details"
         android:textSize="34sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -39,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Number"
+        android:text="@string/number"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
         app:layout_constraintTop_toBottomOf="@+id/tv_hooray" />
@@ -70,7 +72,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:text="Household"
+        android:text="@string/household"
         app:layout_constraintStart_toEndOf="@+id/HouseholdId_key"
         app:layout_constraintTop_toBottomOf="@+id/patient_number" />
 
@@ -79,7 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Gender"
+        android:text="@string/gender"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
         app:layout_constraintTop_toBottomOf="@+id/HouseholdId_key" />
@@ -100,7 +102,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Date of Birth"
+        android:text="@string/date_of_birth"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
         app:layout_constraintTop_toBottomOf="@+id/MemberGender_key" />
@@ -111,7 +113,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:text="DoB"
+        android:text="@string/dob"
         app:layout_constraintStart_toEndOf="@+id/MemberDateOfBirth_key"
         app:layout_constraintTop_toBottomOf="@+id/MemberGenderId" />
 
@@ -120,7 +122,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Subscription Date"
+        android:text="@string/subscription_date"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
         app:layout_constraintTop_toBottomOf="@+id/MemberDateOfBirth_key" />
@@ -131,7 +133,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:text="SubscriptionDate"
+        android:text="@string/subscriptiondate"
         app:layout_constraintStart_toEndOf="@+id/CurrentSubscriptionDate_key"
         app:layout_constraintTop_toBottomOf="@+id/MemberDateOfBirth" />
 
@@ -140,7 +142,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Subscription Duration"
+        android:text="@string/subscription_duration"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
         app:layout_constraintTop_toBottomOf="@+id/CurrentSubscriptionDate_key" />
@@ -152,30 +154,43 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
-        android:text="SubscriptionDurn"
+        android:text="@string/subscriptiondurn"
         app:layout_constraintStart_toEndOf="@+id/SubscriptionDuration_key"
         app:layout_constraintTop_toBottomOf="@+id/CurrentSubscriptionDate" />
 
     <TextView
-        android:id="@+id/Messages"
+        android:id="@+id/SubscriptionExpired"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Subscription Expired"
+        android:text="@string/subscription_expired"
         android:textColor="#FF0000"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
         app:layout_constraintTop_toBottomOf="@+id/SubscriptionDuration_key" />
 
+
+    <TextView
+        android:id="@+id/NotInDatabase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/barcode_identified_nbut_member_not_in_database"
+        android:textColor="#FF0000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintTop_toBottomOf="@+id/SubscriptionDuration_key" />
 
     <Button
         android:id="@+id/bt_scan_another"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Scan another"
+        android:text="@string/scan_another"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

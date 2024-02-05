@@ -78,12 +78,11 @@
 
 
     <TextView
-        android:id="@+id/Messages"
+        android:id="@+id/NotInDatabase"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Barcode identified, \nbut member not in database"
-        android:textColor="#FF0000"
+        android:text="@string/barcode_identified_nbut_member_not_in_database"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tv_hooray"
@@ -95,7 +94,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Scan another"
+        android:text="@string/scan_another"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

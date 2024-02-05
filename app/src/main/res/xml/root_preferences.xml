@@ -12,10 +12,5 @@
             app:title="Patient Image Server URL"
             app:useSimpleSummaryProvider="true" />
 
-        <EditTextPreference
-            app:key="deviceImageDir"
-            app:title="Image Directory (on this device)"
-            app:useSimpleSummaryProvider="true" />
-
     </PreferenceCategory>
 </PreferenceScreen>

@@ -11,10 +11,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class ImageLogger {
+public class ImageHelper {
 
-    private static final String TAG = "ImageLogger";
+    private static final String TAG = "ImageHelper";
 
     public static void rescanMediaStore(Context context) {
         // Specify the file or directory to be scanned (for all images, you can use Environment.getExternalStorageDirectory())
@@ -42,7 +43,7 @@ public class ImageLogger {
     private static void logAllImages(Context context) {
 
         // Define the columns you want to retrieve from the MediaStore.Images database
-        String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME};
+        String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME };  //, MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Images.Media.EXTERNAL_CONTENT_URI};
 
         // Get the ContentResolver
         ContentResolver contentResolver = context.getContentResolver();
@@ -64,6 +65,8 @@ public class ImageLogger {
                     Log.d(TAG, "Image ID: " + imageId);
                     Log.d(TAG, "Image Path: " + imagePath);
                     Log.d(TAG, "Display Name: " + displayName);
+                    Uri imgUri = Uri.parse(imagePath);
+                    Log.d(TAG, imgUri.toString());
                     Log.d(TAG, "------------------------");
                 }
             } finally {
@@ -71,5 +74,27 @@ public class ImageLogger {
                 cursor.close();
             }
         }
+    }
+
+    public static List<Uri> getImageUris(String memberId, Context context) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Images.Media.DISPLAY_NAME + "=?";
+        String[] selectionArgs = {memberId};
+        // Perform the query
+        Cursor cursor = contentResolver.query(imageUri, projection, selection, selectionArgs, null);
+        List<Uri> uris = new ArrayList<Uri>();
+        try {
+            while (cursor.moveToNext()) {
+                @SuppressLint("Range") String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                Uri imgUri = Uri.fromFile(new java.io.File(imagePath));
+                uris.add(imgUri);
+            }
+
+        } finally {
+            cursor.close();
+        }
+        return uris;
     }
 }

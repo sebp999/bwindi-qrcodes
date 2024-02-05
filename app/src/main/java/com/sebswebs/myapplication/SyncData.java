@@ -41,11 +41,13 @@ public class SyncData extends BaseMenus {
     private static final String FILENAME = "last_updated";
     private TextView resultsTextView;
     private Button fullSyncButton;
+    private Button cancelUpdate;
     private Button updateSyncButton;
     private int myProgressNum = 0;
 
     private ProgressBar myProgressBar;
     private TextView myProgressText;
+    private UpdateThread myUpdateThread;
     private Handler handler = new Handler();
 
     private boolean addPatientToDb(JSONObject some_patient) {
@@ -100,6 +102,7 @@ public class SyncData extends BaseMenus {
     }
 
     private class UpdateThread extends Thread {
+        public boolean cancel = false;
         // A thread that updates the database
         private String myDatabaseURL = null;
         private boolean thisIsUpdate = false;
@@ -176,39 +179,45 @@ public class SyncData extends BaseMenus {
                 });
                 int num_patients = patients.length();
                 for (int i = 0; i < num_patients; i++) {
-                    JSONObject patient = patients.getJSONObject(i);
-                    addPatientToDb(patient);
-                    if (thisIsUpdate) {
-                        try {
-                            downloadPatientImg(patient);
-                        } catch (IOException failed) {
-                            TextView warnings = (TextView) findViewById(R.id.textView);
-                            String existing_text = warnings.getText().toString();
-                            String error = existing_text + "\nUnable to find image on server " + patient.getString("MemberId") + ".jpg";
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    warnings.setText(error);
-                                }
-                            });
+                    if (!cancel) {
+                        JSONObject patient = patients.getJSONObject(i);
+                        addPatientToDb(patient);
+                        if (thisIsUpdate) {
+                            try {
+                                downloadPatientImg(patient);
+                            } catch (IOException failed) {
+                                TextView warnings = (TextView) findViewById(R.id.textView);
+                                String existing_text = warnings.getText().toString();
+                                String error = existing_text + "\nUnable to find image on server " + patient.getString("MemberId") + ".jpg";
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        warnings.setText(error);
+                                    }
+                                });
+                            }
                         }
-                    }
-                    if (i % 100 == 0) {
-                        myProgressNum = i;
-                        update_progress_display(myProgressNum, myProgressBar);
+                        if (i % 100 == 0) {
+                            myProgressNum = i;
+                            update_progress_display(myProgressNum, myProgressBar);
+                        }
+                    } else {
+                        break;
                     }
                 }
                 update_progress_display(myProgressBar.getMax(), myProgressBar); // final
-                String filename = "last_updated";
-                String fileContents = Instant.now().toString();
-                Context context = SyncData.this;
-                try {
-                    FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
-                    fos.write(fileContents.getBytes());
-                    FileInputStream fis = context.openFileInput(filename);
-                    String contents = String.valueOf(fis.read());
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
+                if (!cancel) {
+                    String filename = "last_updated";
+                    String fileContents = Instant.now().toString();
+                    Context context = SyncData.this;
+                    try {
+                        FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
+                        fos.write(fileContents.getBytes());
+                        FileInputStream fis = context.openFileInput(filename);
+                        String contents = String.valueOf(fis.read());
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             } catch (JSONException e) {
                 throw new RuntimeException(e);
@@ -272,13 +281,21 @@ public class SyncData extends BaseMenus {
 
         resultsTextView = (TextView) findViewById(R.id.textView);
         fullSyncButton = (Button) findViewById(R.id.displayData);
+        cancelUpdate = (Button) findViewById(R.id.cancelUpdate);
         String db_url = getPatientDatabaseURL();
 
 
         fullSyncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new UpdateThread(db_url, false).start();
+                myUpdateThread = new UpdateThread(db_url, false);
+                myUpdateThread.start();
+            }
+        });
+        cancelUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myUpdateThread.cancel = true;
             }
         });
 
@@ -287,7 +304,8 @@ public class SyncData extends BaseMenus {
             @Override
             public void onClick(View view)  {
                 try{
-                    new UpdateThread(db_url, true).start();
+                    myUpdateThread = new UpdateThread(db_url, true);
+                    myUpdateThread.start();
                 } catch (RuntimeException e) {  // No last updated file found.  You have to run full sync first.
                     Throwable cause = e.getCause();
                     if (cause instanceof FileNotFoundException) {
