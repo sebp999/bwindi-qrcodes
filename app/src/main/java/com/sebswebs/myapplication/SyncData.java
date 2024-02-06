@@ -18,6 +18,8 @@ import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,11 +33,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.time.Instant;
-
+import java.util.Date;
 
 public class SyncData extends BaseMenus {
     private static final String FILENAME = "last_updated";
@@ -98,131 +101,184 @@ public class SyncData extends BaseMenus {
     }
 
     private String getPatientImageDir() {
+//      TODO SAVE THE IMAGE TO MEDIASTORE
         return getPref("deviceImageDir");
     }
+
+//    private class FetchFeedThread extends Thread {
+//        /**
+//         * Updates the database from a URL
+//         */
+//        private String feedContents = "";
+//        private URL myUrl = null;
+//
+//        public FetchFeedThread(URL u) {
+//            myUrl = u;
+//        }
+//
+//
+//
+//        private void showMessage(String s) {
+//            Snackbar.make(findViewById(R.id.updatedText), (CharSequence) "s", Snackbar.LENGTH_LONG).show();
+//
+//        }
+//        public void run() {
+//            /**
+//             * Connects to URL, gets text
+//             */
+//            // TODO: try and catch
+//        }
+//    }
+
 
     private class UpdateThread extends Thread {
         public boolean cancel = false;
         // A thread that updates the database
         private String myDatabaseURL = null;
         private boolean thisIsUpdate = false;
+        String TAG = "jjjjj";
         public UpdateThread(String dbUrl, boolean isUpdate){
             // constructor
             myDatabaseURL = dbUrl;
             thisIsUpdate = isUpdate;
         }
-
-
+        private void showMessage(String s) {
+            final Snackbar snack = Snackbar.make(findViewById(R.id.updatedText), (CharSequence) s, Snackbar.LENGTH_INDEFINITE);
+            snack.setAction(
+                "ok",
+                new View.OnClickListener(){
+                    @Override public void onClick(View view){
+                        Log.e(TAG, "CLICKED");
+                        snack.dismiss();
+                    }
+                }).show();
+        }
         @Override
         public void run() {
 
+            Log.e(TAG, "this is update: " + thisIsUpdate);
             if (thisIsUpdate){
                 try {
                     Context context = SyncData.this;
                     FileInputStream fis = context.openFileInput(FILENAME);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
                     String line = reader.readLine();
-
+                    Log.e(TAG, "line: "+ line);
                     String justDate = line.substring(0,10);
                     myDatabaseURL = myDatabaseURL+"?since="+justDate;
 
-                    Log.e("BarcodeScanner", "this is an update so I'm using url "+ myDatabaseURL);
+                    Log.e(TAG, "this is an update so I'm using url "+ myDatabaseURL);
 
-                } catch (FileNotFoundException e) {
+                } catch (FileNotFoundException | NullPointerException e) {
                     //This is the first time it has been run, so report that you have to do a full sync first.
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            myProgressText = (TextView) findViewById(R.id.updatedText);
-                            myProgressText.setText("Please run a full sync before updating");
+                            Log.e(TAG, "no date file found");
+                            showMessage("Please run a full sync before updating");
                         }
                     });
                     return;
                 } catch (IOException ioe){
-                    throw new RuntimeException(ioe);
+                    Log.e(TAG, "ioexecption on open file");
+                    showMessage("Unexpected error getting last-updated date");
                 }
             }
             String feedContents = null;
             try {
                 feedContents = readFeedContents();
-                if (feedContents.trim().length() == 0){
-                    Log.e("barcodescanner", "zero length feed");
+                Log.e(TAG, "feed: " + feedContents);
+
+            } catch (InterruptedException e) {
+                Log.e(TAG, "interruptedexception");
+                showMessage("Unexpected error getting data: try again");
+            } catch (MalformedURLException m) {
+                Log.e(TAG, "malformed");
+                showMessage("Couldn't connect to "+myDatabaseURL+ ", check URL in settings");
+            } catch (IOException io) {
+                Log.e(TAG, "IOException");
+                showMessage("Can't get data from "+myDatabaseURL+ ", check URL in settings");
+            }
+
+            Log.e(TAG, "Adding data to database from API " + Instant.now().toString());
+
+            if (feedContents!=null) {
+                try {
+                    JSONArray patients = new JSONArray(feedContents);
+                    if (!thisIsUpdate && patients.length() > 0) {
+                        recreateDatabase();
+                    }
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            Log.e(TAG, "setting up progress bar for max "+patients.length());
+                            myProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+                            Log.e(TAG, "myProgressBar is "+myProgressBar);
+                            Log.e(TAG, "patients is "+patients);
+                            myProgressBar.setMax(patients.length());
+                            Log.e(TAG, "set max to "+patients.length());
                             myProgressText = (TextView) findViewById(R.id.updatedText);
-                            myProgressText.setText("No new records since last update");
+                            myProgressText.setText("0/" + myProgressBar.getMax());
+                            Log.e(TAG, "finished setting up progress bar for max "+patients.length());
                         }
                     });
-                    return;
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (MalformedURLException m) {
-                throw new RuntimeException(m);
-            }
-
-            Log.e("BarcodeScanner", "Adding data to database from API " + Instant.now().toString());
-            try {
-                JSONArray patients = new JSONArray(feedContents);
-                if (!thisIsUpdate && patients.length() > 0) {
-                    recreateDatabase();
-                }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        myProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-                        myProgressBar.setMax(patients.length());
-                        myProgressText = (TextView) findViewById(R.id.updatedText);
-                        myProgressText.setText("0/"+myProgressBar.getMax());
-                    }
-                });
-                int num_patients = patients.length();
-                for (int i = 0; i < num_patients; i++) {
-                    if (!cancel) {
-                        JSONObject patient = patients.getJSONObject(i);
-                        addPatientToDb(patient);
-                        if (thisIsUpdate) {
-                            try {
-                                downloadPatientImg(patient);
-                            } catch (IOException failed) {
-                                TextView warnings = (TextView) findViewById(R.id.textView);
-                                String existing_text = warnings.getText().toString();
-                                String error = existing_text + "\nUnable to find image on server " + patient.getString("MemberId") + ".jpg";
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        warnings.setText(error);
-                                    }
-                                });
+                    int num_patients = patients.length();
+                    Log.e(TAG, "Adding "+num_patients+" members to DB");
+                    for (int i = 0; i < num_patients; i++) {
+                        if (!cancel) {
+                            JSONObject patient = patients.getJSONObject(i);
+                            addPatientToDb(patient);
+                            if (thisIsUpdate) {
+                                try {
+                                    downloadPatientImg(patient);
+                                } catch (IOException failed) {
+                                    TextView warnings = (TextView) findViewById(R.id.textView);
+                                    String existing_text = warnings.getText().toString();
+                                    String error = existing_text + "\nUnable to find image on server " + patient.getString("MemberId") + ".jpg";
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            warnings.setText(error);
+                                        }
+                                    });
+                                }
                             }
+                            if (i % 100 == 0) {
+                                Log.e(TAG, "updating");
+                                myProgressNum = i;
+                                update_progress_display(myProgressNum, myProgressBar);
+
+                            }
+                        } else {
+                            Log.e(TAG, "Cancelled: breaking");
+                            break;
                         }
-                        if (i % 100 == 0) {
-                            myProgressNum = i;
-                            update_progress_display(myProgressNum, myProgressBar);
+                    }
+
+                    update_progress_display(myProgressBar.getMax(), myProgressBar); // final
+                    if (num_patients == 0){
+                        showMessage("No new members added since last update");
+                    }
+                    if (!cancel) {
+                        String filename = "last_updated";
+                        String fileContents = Instant.now().toString();
+                        Context context = SyncData.this;
+                        try {
+                            FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
+                            fos.write(fileContents.getBytes());
+                            FileInputStream fis = context.openFileInput(filename);
+                            String contents = String.valueOf(fis.read());
+                        } catch (FileNotFoundException e) {
+                            throw new RuntimeException(e);
                         }
                     } else {
-                        break;
+                        showMessage("User cancelled");
                     }
+                } catch (JSONException e) {
+                    showMessage("Can't read the database feed: check the URL in settings");
+                } catch (IOException e) {
+                    showMessage("Update succeeded but unable to save the last-updated date");
                 }
-                update_progress_display(myProgressBar.getMax(), myProgressBar); // final
-                if (!cancel) {
-                    String filename = "last_updated";
-                    String fileContents = Instant.now().toString();
-                    Context context = SyncData.this;
-                    try {
-                        FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
-                        fos.write(fileContents.getBytes());
-                        FileInputStream fis = context.openFileInput(filename);
-                        String contents = String.valueOf(fis.read());
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
 
@@ -250,22 +306,32 @@ public class SyncData extends BaseMenus {
         private void update_progress_display(int progressNum, ProgressBar progressBar) {
             handler.post(new Runnable() {
                 public void run() {
-                    Log.e("BarcodeScanner", (progressNum + 1) + " records added to database" + Instant.now().toString());
+                    Log.e(TAG, (progressNum + 1) + " records added to database" + Instant.now().toString());
                     myProgressBar.setProgress(progressNum);
                     myProgressText.setText(progressNum + "/" + progressBar.getMax());
                 }
             });
         }
 
-        private String readFeedContents() throws InterruptedException, MalformedURLException {
-            /**
-             * Get feed contents
-             * @return the feed contents
-             */
-            FeedThread t = new FeedThread(new URL(myDatabaseURL));
-            t.start();
-            t.join();
-            return t.getFeedContents();
+        private String readFeedContents() throws MalformedURLException, IOException, InterruptedException {
+
+            StringBuilder feedContents = new StringBuilder();
+            HttpURLConnection urlConnection = null;
+            try {
+                urlConnection = (HttpURLConnection) new URL(myDatabaseURL).openConnection();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    feedContents.append(line);
+                }
+                Log.e("BarcodeScanner", "Finished reading data from API " + new Date());
+            }  finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+            return feedContents.toString();
         }
     }
 
@@ -311,7 +377,9 @@ public class SyncData extends BaseMenus {
                     if (cause instanceof FileNotFoundException) {
                         throw new RuntimeException("You have to run full sync before you can update");
                     } else {
-                        throw e;
+                        Snackbar.make(findViewById(R.id.updatedText), (CharSequence) "Unable to sync: check the URL", Snackbar.LENGTH_LONG).show();
+//                                .setAction("OK"){Log.e("ggg", "ggg")}
+//                                .show();
                     }
                 }
             }

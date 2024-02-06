@@ -110,8 +110,7 @@ class MainActivity : BaseMenus() {
             val scanner = BarcodeScanning.getClient(options)
 
             // setting up the analysis use case
-            val analysisUseCase = ImageAnalysis.Builder()
-                .build()
+            val analysisUseCase = ImageAnalysis.Builder().build()
 
             // define the actual functionality of our analysis use case
             analysisUseCase.setAnalyzer(
