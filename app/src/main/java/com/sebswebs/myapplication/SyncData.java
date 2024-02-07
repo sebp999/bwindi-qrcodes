@@ -2,13 +2,17 @@ package com.sebswebs.myapplication;
 
 import static com.sebswebs.myapplication.PatientDbEntries.SQL_DELETE_ENTRIES;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +30,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,6 +44,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 
 public class SyncData extends BaseMenus {
     private static final String FILENAME = "last_updated";
@@ -99,37 +105,6 @@ public class SyncData extends BaseMenus {
     private String getPatientDatabaseURL(){
         return getPref("patientDatabaseURL");
     }
-
-    private String getPatientImageDir() {
-//      TODO SAVE THE IMAGE TO MEDIASTORE
-        return getPref("deviceImageDir");
-    }
-
-//    private class FetchFeedThread extends Thread {
-//        /**
-//         * Updates the database from a URL
-//         */
-//        private String feedContents = "";
-//        private URL myUrl = null;
-//
-//        public FetchFeedThread(URL u) {
-//            myUrl = u;
-//        }
-//
-//
-//
-//        private void showMessage(String s) {
-//            Snackbar.make(findViewById(R.id.updatedText), (CharSequence) "s", Snackbar.LENGTH_LONG).show();
-//
-//        }
-//        public void run() {
-//            /**
-//             * Connects to URL, gets text
-//             */
-//            // TODO: try and catch
-//        }
-//    }
-
 
     private class UpdateThread extends Thread {
         public boolean cancel = false;
@@ -232,22 +207,16 @@ public class SyncData extends BaseMenus {
                                 try {
                                     downloadPatientImg(patient);
                                 } catch (IOException failed) {
-                                    TextView warnings = (TextView) findViewById(R.id.textView);
-                                    String existing_text = warnings.getText().toString();
-                                    String error = existing_text + "\nUnable to find image on server " + patient.getString("MemberId") + ".jpg";
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            warnings.setText(error);
-                                        }
-                                    });
+                                    String error = "Unable to find image on server " + patient.getString("MemberId") + ".jpg";
+                                    showMessage(error);
+                                } catch (JSONException jsonException){
+                                    showMessage("Record for Patient " +patient.getString("MemberId")+ " corrupted in feed");
                                 }
                             }
                             if (i % 100 == 0) {
                                 Log.e(TAG, "updating");
                                 myProgressNum = i;
                                 update_progress_display(myProgressNum, myProgressBar);
-
                             }
                         } else {
                             Log.e(TAG, "Cancelled: breaking");
@@ -289,18 +258,34 @@ public class SyncData extends BaseMenus {
             URL imgDownloadUrl = new URL(getImageServerURL() + patientId + ".jpg");
             URLConnection conn = imgDownloadUrl.openConnection();
             InputStream input = new BufferedInputStream(imgDownloadUrl.openStream(), 8192);
-            OutputStream output = new FileOutputStream(getPatientImageDir() + "/"+ patientId + ".jpg");
-            Log.e("", "outputting file " + getFilesDir().toString()+"/");
-            byte data[] = new byte[1024];
+
+            OutputStream outputStream;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentResolver resolver = getContentResolver();
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, patientId + ".jpg");
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg");
+                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+                Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+                outputStream = resolver.openOutputStream(Objects.requireNonNull(imageUri));
+            } else {
+                String imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
+                File image = new File(imagesDir, patientId + ".jpg");
+                outputStream = new FileOutputStream(image);
+            }
+
+            Log.e(TAG, "outputting file " + getFilesDir().toString()+"/");
+            byte[] data = new byte[1024];
 
             long total = 0;
 
             while ((count = input.read(data)) != -1) {
                 total += count;
-                output.write(data, 0, count);
+                outputStream.write(data, 0, count);
             }
-            output.flush();
-            output.close();
+            outputStream.flush();
+            outputStream.close();
         }
 
         private void update_progress_display(int progressNum, ProgressBar progressBar) {
