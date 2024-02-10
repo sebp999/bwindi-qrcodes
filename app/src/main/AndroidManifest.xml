@@ -12,8 +12,10 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29" />
+
     <!--    End needed for MediaStore-->
     <application
+        android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
         android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
