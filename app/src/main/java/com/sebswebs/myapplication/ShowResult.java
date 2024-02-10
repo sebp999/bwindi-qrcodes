@@ -9,22 +9,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.ExperimentalGetImage;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.sebswebs.myapplication.databinding.ActivityBarcodeIdentifiedBinding;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.IOException;
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,16 +40,6 @@ public final class ShowResult extends AppCompatActivity {
         return date.plusDays(numDays).isBefore(now);
     }
 
-    private String getImagesDir() {
-        SharedPreferences preferences = (SharedPreferences) PreferenceManager.getDefaultSharedPreferences(this);
-        String imageDir = preferences.getString("deviceImageDir", null);
-        return imageDir;
-    }
-
-    //    public void rescanImages() {
-//        MediaScannerConnection.scanFile(this, );
-//
-//    }
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -62,6 +52,18 @@ public final class ShowResult extends AppCompatActivity {
         try {
             if (barcodeInfo != null) {
                 barcodeParts = Arrays.asList(barcodeInfo.split(","));
+                if (barcodeParts.size()!=3) {
+                    final Snackbar snack = Snackbar.make(findViewById(R.id.updatedText), (CharSequence) ("This bar code looks wrong: it should have 3 items but it has "+barcodeParts.size()), Snackbar.LENGTH_INDEFINITE);
+                    snack.setAction(
+                            "ok",
+                            new View.OnClickListener(){
+                                @Override public void onClick(View view){
+                                    snack.dismiss();
+                                    switchToMain();
+                                }
+                            }).show();
+
+                }
             } else {
                 Log.e("xxxx", "No data from bar code ?!");
                 return;
@@ -105,63 +107,7 @@ public final class ShowResult extends AppCompatActivity {
                 } else {
                     this.binding.SubscriptionExpired.setVisibility(View.INVISIBLE);
                 }
-                //            String imageDir = getImagesDir();
-                //            File imgFile = new File(imageDir + "/" +memberImagePath);
 
-                //            GET IMAGE FILE NOW!
-
-
-                //            Uri collection;
-                //            ContentResolver contentResolver = this.getContentResolver();
-                //            ArrayList photos = new ArrayList();
-                //            Cursor cursor;
-                //
-                //            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                //                // api 29 and up
-                //
-                //                cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                //                        new String[]{MediaStore.Images.Media._ID},
-                //                        null,
-                //                        null,
-                //                        MediaStore.Images.Media.DATE_TAKEN + " DESC"
-                //                );
-                //
-                //                if (null == cursor) {
-                //                    Log.e("xxxx", String.valueOf(photos));
-                //                }
-                //
-                //                if (cursor.moveToFirst()) {
-                //                    do {
-                //                        String photoUrl = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID))).toString();
-                //                        photos.add(photoUrl);
-                //
-                //                    } while (cursor.moveToNext());
-                //                }
-                //            } else {
-                //
-                //                cursor = contentResolver.query(
-                //                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                //                        null,
-                //                        null,
-                //                        null,
-                //                        MediaStore.Images.Media.DATA + " DESC"
-                //                );
-                //
-                //                if (null == cursor) {
-                //                    Log.e("xxxx", String.valueOf(photos));
-                //                }
-                //
-                //                if (cursor.moveToFirst()) {
-                //                    do {
-                //                        String fullPath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                //                        photos.add(fullPath);
-                //                    } while (cursor.moveToNext());
-                //                }
-                //            }
-                //            cursor.close();
-                Log.e("permission?", String.valueOf(checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)));
-
-                log_images();
                 Bitmap image = get_image(memberId);
                 this.binding.patientImage.setImageBitmap(image);
             } else { // nothing in database
@@ -193,25 +139,21 @@ public final class ShowResult extends AppCompatActivity {
     }
 
     private Bitmap get_image(String memberId) {
-        List<Uri> imgUris = ImageHelper.getImageUris(memberId + ".jpg", this);
-        if (imgUris.size() > 0) {
-            Uri imgUri = imgUris.get(0);
-            try {
-                return BitmapFactory.decodeStream(getContentResolver().openInputStream(imgUri));
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
+
+//        File primaryExternalStorage = this.getExternalMediaDirs()[0];
+        File primaryExternalStorage = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File appImagesDir = new File(primaryExternalStorage, "members");
+        File image = new File(appImagesDir, memberId+".jpg");
+        try {
+            return BitmapFactory.decodeStream(getContentResolver().openInputStream(Uri.fromFile(image)));
+        } catch (IOException noSuchFile){
+            return null;
         }
-        return null;
     }
 
     private final void switchToMain() {
         @OptIn(markerClass = ExperimentalGetImage.class) Intent switchActivityIntent = new Intent((Context) this, MainActivity.class);
         this.startActivity(switchActivityIntent);
-    }
-
-    private void log_images() {
-        ImageHelper.rescanMediaStore(this);
     }
 }
 

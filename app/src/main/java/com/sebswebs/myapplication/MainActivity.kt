@@ -31,7 +31,6 @@ class MainActivity : BaseMenus() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        Log.e("xxxx", "xxxx")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val toolbar = findViewById<View>(R.id.toolbar) as Toolbar
@@ -58,11 +57,11 @@ class MainActivity : BaseMenus() {
         )
     }
 
-    private fun switchToReadDatabase() {
-        Log.e("xxx", "stub read database")
-//        val switchActivityIntent = Intent(this, SyncData::class.java)
-//        startActivity(switchActivityIntent)
-    }
+//    private fun switchToReadDatabase() {
+//        Log.e("xxx", "stub read database")
+////        val switchActivityIntent = Intent(this, SyncData::class.java)
+////        startActivity(switchActivityIntent)
+//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -140,25 +139,18 @@ class MainActivity : BaseMenus() {
     }
 
     private fun onFoundActivity(value: String) {
-        Log.e(TAG, "switching...")
         val switchActivityIntent = Intent(this, ShowResult::class.java)
         switchActivityIntent.putExtra("barcodeValue", value)
         if (!alreadySwitched) {
             startActivity(switchActivityIntent)
             alreadySwitched = true
-            Log.e(TAG,"I switched")
         }
-        else {
-            Log.e(TAG, "I had already switched")
-        }
-
     }
 
     private fun processImageProxy(
         barcodeScanner: BarcodeScanner,
         imageProxy: ImageProxy
     ) {
-        Log.e(TAG, imageProxy.imageInfo.rotationDegrees.toString())
         imageProxy.image?.let { image ->
             val inputImage =
                 InputImage.fromMediaImage(
@@ -166,7 +158,6 @@ class MainActivity : BaseMenus() {
                     imageProxy.imageInfo.rotationDegrees
                 )
 
-            Log.e(TAG, inputImage.toString() )
             barcodeScanner.process(inputImage)
                 .addOnSuccessListener { barcodeList ->
 
@@ -182,15 +173,12 @@ class MainActivity : BaseMenus() {
                 .addOnFailureListener {
                     // This failure will happen if the barcode scanning model
                     // fails to download from Google Play Services
-                    Log.e(TAG, "barcode success")
                     Log.e(TAG, it.message.orEmpty())
                 }.addOnCompleteListener {
-                    Log.e(TAG, "barcode complete")
                     // When the image is from CameraX analysis use case, must
                     // call image.close() on received images when finished
                     // using them. Otherwise, new images may not be received
                     // or the camera may stall.
-
                     imageProxy.image?.close()
                     imageProxy.close()
                 }
@@ -199,6 +187,5 @@ class MainActivity : BaseMenus() {
 
     companion object {
         val TAG: String = MainActivity::class.java.simpleName
-
     }
 }

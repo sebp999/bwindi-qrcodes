@@ -42,6 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
@@ -188,8 +189,6 @@ public class SyncData extends BaseMenus {
                         public void run() {
                             Log.e(TAG, "setting up progress bar for max "+patients.length());
                             myProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-                            Log.e(TAG, "myProgressBar is "+myProgressBar);
-                            Log.e(TAG, "patients is "+patients);
                             myProgressBar.setMax(patients.length());
                             Log.e(TAG, "set max to "+patients.length());
                             myProgressText = (TextView) findViewById(R.id.updatedText);
@@ -256,26 +255,16 @@ public class SyncData extends BaseMenus {
             int count;
             String patientId = patient.getString("MemberId");
             URL imgDownloadUrl = new URL(getImageServerURL() + patientId + ".jpg");
-            URLConnection conn = imgDownloadUrl.openConnection();
             InputStream input = new BufferedInputStream(imgDownloadUrl.openStream(), 8192);
 
             OutputStream outputStream;
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ContentResolver resolver = getContentResolver();
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, patientId + ".jpg");
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg");
-                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
-                Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-                outputStream = resolver.openOutputStream(Objects.requireNonNull(imageUri));
-            } else {
-                String imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
-                File image = new File(imagesDir, patientId + ".jpg");
-                outputStream = new FileOutputStream(image);
-            }
+            File primaryExternalStorage = SyncData.this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File appImagesDir = new File(primaryExternalStorage, "members");
+            File image = new File(appImagesDir, patientId + ".jpg");
 
-            Log.e(TAG, "outputting file " + getFilesDir().toString()+"/");
+            outputStream = Files.newOutputStream(image.toPath());
+
             byte[] data = new byte[1024];
 
             long total = 0;
@@ -354,19 +343,8 @@ public class SyncData extends BaseMenus {
         updateSyncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)  {
-                try{
-                    myUpdateThread = new UpdateThread(db_url, true);
-                    myUpdateThread.start();
-                } catch (RuntimeException e) {  // No last updated file found.  You have to run full sync first.
-                    Throwable cause = e.getCause();
-                    if (cause instanceof FileNotFoundException) {
-                        throw new RuntimeException("You have to run full sync before you can update");
-                    } else {
-                        Snackbar.make(findViewById(R.id.updatedText), (CharSequence) "Unable to sync: check the URL", Snackbar.LENGTH_LONG).show();
-//                                .setAction("OK"){Log.e("ggg", "ggg")}
-//                                .show();
-                    }
-                }
+                myUpdateThread = new UpdateThread(db_url, true);
+                myUpdateThread.start();
             }
         });
     }

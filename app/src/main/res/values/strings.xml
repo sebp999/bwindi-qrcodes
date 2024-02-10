@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BarcodeScanner</string>
+    <string name="app_name">Barcode Scanner</string>
     <string name="barcode_value">Barcode Value: %1$s</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
