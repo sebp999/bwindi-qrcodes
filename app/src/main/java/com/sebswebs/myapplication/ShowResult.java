@@ -71,11 +71,9 @@ public final class ShowResult extends BaseMenus {
         SQLiteDatabase database = databaseHelper.getReadableDatabase();
         String[] cols = {"MemberId", "HouseholdId", "Client_Name", "MemberGender", "MemberDateOfBirth", "CurrentSubscriptionDate", "SubscriptionDuration", "MemberImagePath"};
         Cursor result = database.query("patient", cols, "MemberId='" + barcodePatientId + "'", null, null, null, "SubscriptionDuration DESC");
-        Log.e("result", result.getCount() + "");
         try {
             if (result.moveToFirst()) {
                 String memberId = result.getString(0);
-                Log.e("memberId", memberId);
                 int householdIdInt = result.getInt(1);
                 String householdId = householdIdInt + "";
                 String clientName = result.getString(2);
@@ -114,7 +112,6 @@ public final class ShowResult extends BaseMenus {
 
             }
         } catch (Exception e) {
-            Log.e("ShowResult", String.valueOf(e));
         } finally {
             result.close();
             database.close();
@@ -122,7 +119,6 @@ public final class ShowResult extends BaseMenus {
 
         this.binding.btScanAnother.setOnClickListener(new View.OnClickListener() {
             public void onClick(@Nullable View view) {
-                Log.e("TAG", "messaged");
                 ShowResult.this.switchToMain();
             }
         });

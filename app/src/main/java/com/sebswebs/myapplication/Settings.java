@@ -8,7 +8,6 @@ import androidx.appcompat.widget.Toolbar;
 
 public class Settings extends BaseMenus {
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e("xxxx", "created settings");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
         Toolbar toolbar = findViewById(R.id.toolbar);

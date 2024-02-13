@@ -112,7 +112,6 @@ public class SyncData extends BaseMenus {
         // A thread that updates the database
         private String myDatabaseURL = null;
         private boolean thisIsUpdate = false;
-        String TAG = "jjjjj";
         public UpdateThread(String dbUrl, boolean isUpdate){
             // constructor
             myDatabaseURL = dbUrl;
@@ -124,7 +123,6 @@ public class SyncData extends BaseMenus {
                 "ok",
                 new View.OnClickListener(){
                     @Override public void onClick(View view){
-                        Log.e(TAG, "CLICKED");
                         snack.dismiss();
                     }
                 }).show();
@@ -140,42 +138,30 @@ public class SyncData extends BaseMenus {
                     String line = reader.readLine();
                     String justDate = line.substring(0,10);
                     myDatabaseURL = myDatabaseURL+"?since="+justDate;
-
-                    Log.e(TAG, "this is an update so I'm using url "+ myDatabaseURL);
-
                 } catch (FileNotFoundException | NullPointerException e) {
                     //This is the first time it has been run, so report that you have to do a full sync first.
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Log.e(TAG, "no date file found");
                             showMessage("Please run a full sync before updating");
                         }
                     });
                     return;
                 } catch (IOException ioe){
-                    Log.e(TAG, "ioexecption on open file");
                     showMessage("Unexpected error getting last-updated date");
                 }
             }
             String feedContents = null;
             try {
-                Log.e("argh", "Reading feed contents");
                 feedContents = readFeedContents();
-                Log.e("argh", "Read feed contents");
 
             } catch (InterruptedException e) {
-                Log.e(TAG, "interruptedexception");
                 showMessage("Unexpected error getting data: try again");
             } catch (MalformedURLException m) {
-                Log.e(TAG, "malformed");
                 showMessage("Couldn't connect to "+myDatabaseURL+ ", check URL in settings");
             } catch (IOException io) {
-                Log.e(TAG, "IOException");
                 showMessage("Can't get data from "+myDatabaseURL+ ", check URL in settings");
             }
-
-            Log.e(TAG, "Adding data to database from API " + Instant.now().toString());
 
             if (feedContents!=null) {
                 try {
@@ -193,7 +179,6 @@ public class SyncData extends BaseMenus {
                         }
                     });
                     int num_patients = patients.length();
-                    Log.e(TAG, "Adding "+num_patients+" members to DB");
                     for (int i = 0; i < num_patients; i++) {
                         if (!cancel) {
                             JSONObject patient = patients.getJSONObject(i);
@@ -209,12 +194,10 @@ public class SyncData extends BaseMenus {
                                 }
                             }
                             if (i % 100 == 0) {
-                                Log.e(TAG, "updating");
                                 myProgressNum = i;
                                 update_progress_display(myProgressNum, myProgressBar);
                             }
                         } else {
-                            Log.e(TAG, "Cancelled: breaking");
                             break;
                         }
                     }
@@ -280,7 +263,6 @@ public class SyncData extends BaseMenus {
         private void update_progress_display(int progressNum, ProgressBar progressBar) {
             handler.post(new Runnable() {
                 public void run() {
-                    Log.e(TAG, (progressNum + 1) + " records added to database" + Instant.now().toString());
                     myProgressBar.setProgress(progressNum);
                     myProgressText.setText(progressNum + "/" + progressBar.getMax());
                 }
@@ -299,7 +281,6 @@ public class SyncData extends BaseMenus {
                 while ((line = bufferedReader.readLine()) != null) {
                     feedContents.append(line);
                 }
-                Log.e("BarcodeScanner", "Finished reading data from API " + new Date());
             }  finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
@@ -310,10 +291,7 @@ public class SyncData extends BaseMenus {
     }
 
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e("DEBUGX", "onCreate");
         super.onCreate(savedInstanceState);
-        Log.e("xxxx", String.valueOf( getExternalFilesDir(null)));
-        Log.e("xxxx", String.valueOf(getExternalFilesDir(Environment.DIRECTORY_PICTURES)));
         setContentView(R.layout.activity_read_database);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
