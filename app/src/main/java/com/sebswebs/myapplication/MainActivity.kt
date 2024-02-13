@@ -7,10 +7,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -18,7 +20,6 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.sebswebs.myapplication.databinding.ActivityMainBinding
 import java.util.concurrent.Executors
-import androidx.appcompat.widget.Toolbar
 
 
 private const val CAMERA_PERMISSION_REQUEST_CODE = 1
@@ -57,12 +58,6 @@ class MainActivity : BaseMenus() {
         )
     }
 
-//    private fun switchToReadDatabase() {
-//        Log.e("xxx", "stub read database")
-////        val switchActivityIntent = Intent(this, SyncData::class.java)
-////        startActivity(switchActivityIntent)
-//    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -98,8 +93,7 @@ class MainActivity : BaseMenus() {
 
             // configure our MLKit BarcodeScanning client
 
-            /* passing in our desired barcode formats - MLKit supports additional formats outside of the
-            ones listed here, and you may not need to offer support for all of these. You should only
+            /* passing in our desired barcode formats -  only
             specify the ones you need */
             val options = BarcodeScannerOptions.Builder().setBarcodeFormats(
                 Barcode.FORMAT_QR_CODE
@@ -162,17 +156,26 @@ class MainActivity : BaseMenus() {
                 .addOnSuccessListener { barcodeList ->
 
                     val barcode = barcodeList.getOrNull(0)
-                    Log.e(TAG, "barcode success" + barcode.toString())
-                    // `rawValue` is the decoded value of the barcode
                     barcode?.rawValue?.let { value ->
-                        Log.e(TAG, value)
-                        binding.bottomText.text = value
-                        onFoundActivity(value)
+                        val barcodeParts = value.split(",").toTypedArray()
+                        if (barcodeParts.size != 3) {
+                            val snack = Snackbar.make(
+                                findViewById<View>(R.id.bottomText),
+                                (("Invalid QR Code") as CharSequence)!!,
+                                Snackbar.LENGTH_INDEFINITE
+                            )
+                            snack.setAction(
+                                "ok"
+                            ) {
+                                snack.dismiss()
+                            }.show()
+                        } else {
+                            binding.bottomText.text = value
+                            onFoundActivity(value)
+                        }
                     }
                 }
                 .addOnFailureListener {
-                    // This failure will happen if the barcode scanning model
-                    // fails to download from Google Play Services
                     Log.e(TAG, it.message.orEmpty())
                 }.addOnCompleteListener {
                     // When the image is from CameraX analysis use case, must

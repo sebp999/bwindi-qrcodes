@@ -132,14 +132,12 @@ public class SyncData extends BaseMenus {
         @Override
         public void run() {
 
-            Log.e(TAG, "this is update: " + thisIsUpdate);
             if (thisIsUpdate){
                 try {
                     Context context = SyncData.this;
                     FileInputStream fis = context.openFileInput(FILENAME);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
                     String line = reader.readLine();
-                    Log.e(TAG, "line: "+ line);
                     String justDate = line.substring(0,10);
                     myDatabaseURL = myDatabaseURL+"?since="+justDate;
 
@@ -162,8 +160,9 @@ public class SyncData extends BaseMenus {
             }
             String feedContents = null;
             try {
+                Log.e("argh", "Reading feed contents");
                 feedContents = readFeedContents();
-                Log.e(TAG, "feed: " + feedContents);
+                Log.e("argh", "Read feed contents");
 
             } catch (InterruptedException e) {
                 Log.e(TAG, "interruptedexception");
@@ -187,13 +186,10 @@ public class SyncData extends BaseMenus {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Log.e(TAG, "setting up progress bar for max "+patients.length());
                             myProgressBar = (ProgressBar) findViewById(R.id.progressBar);
                             myProgressBar.setMax(patients.length());
-                            Log.e(TAG, "set max to "+patients.length());
                             myProgressText = (TextView) findViewById(R.id.updatedText);
                             myProgressText.setText("0/" + myProgressBar.getMax());
-                            Log.e(TAG, "finished setting up progress bar for max "+patients.length());
                         }
                     });
                     int num_patients = patients.length();
@@ -223,9 +219,13 @@ public class SyncData extends BaseMenus {
                         }
                     }
 
+                    myProgressBar = (ProgressBar) findViewById(R.id.progressBar);
                     update_progress_display(myProgressBar.getMax(), myProgressBar); // final
                     if (num_patients == 0){
+                        update_progress_display(0, myProgressBar);
                         showMessage("No new members added since last update");
+                    } else {
+                        update_progress_display(myProgressBar.getMax(), myProgressBar);
                     }
                     if (!cancel) {
                         String filename = "last_updated";
@@ -251,7 +251,7 @@ public class SyncData extends BaseMenus {
         }
 
         private void downloadPatientImg(JSONObject patient) throws JSONException, IOException {
-            Log.e("images", getFilesDir().toString());
+            Log.e("argh", "about to get image");
             int count;
             String patientId = patient.getString("MemberId");
             URL imgDownloadUrl = new URL(getImageServerURL() + patientId + ".jpg");

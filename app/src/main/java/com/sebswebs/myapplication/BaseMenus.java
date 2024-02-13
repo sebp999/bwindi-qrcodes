@@ -8,7 +8,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.ExperimentalGetImage;
 
 
 public class BaseMenus extends AppCompatActivity {
@@ -19,14 +21,10 @@ public class BaseMenus extends AppCompatActivity {
     }
 
     public void settingsClicked(View v) {
-        Log.e("xxxx", "clicked");
         Intent switchActivityIntent = new Intent(BaseMenus.this, Settings.class);
         startActivity(switchActivityIntent);
     }
 
-    public void menuClicked(View v){
-        Log.e("xxxx", "menu clicked");
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -48,6 +46,11 @@ public class BaseMenus extends AppCompatActivity {
         startActivity(switchActivityIntent);
     }
 
+    public void goToScan(){
+        Log.e("xxx", "to settings");
+        @OptIn(markerClass = ExperimentalGetImage.class) Intent switchActivityIntent = new Intent(BaseMenus.this, MainActivity.class);
+        startActivity(switchActivityIntent);
+    }
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.e("xxxx", "item selected");
         if (item.getItemId() == R.id.menu_update){
@@ -55,6 +58,9 @@ public class BaseMenus extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.menu_settings) {
             goToSettings();
+            return true;
+        } else if (item.getItemId() == R.id.menu_scan) {
+            goToScan();
             return true;
         }
         return false;

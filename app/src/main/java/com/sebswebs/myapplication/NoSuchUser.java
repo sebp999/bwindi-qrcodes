@@ -26,7 +26,7 @@ public final class NoSuchUser extends AppCompatActivity {
         List barcodeParts = Arrays.asList(barcodeInfo.split(","));
 
         this.binding.membershipNum.setText((CharSequence) barcodeParts.get(0));
-        this.binding.tvHooray.setText((CharSequence) barcodeParts.get(1));
+        this.binding.memberName.setText((CharSequence) barcodeParts.get(1));
         this.binding.MemberDateOfBirth.setText((CharSequence) barcodeParts.get(2));
         this.binding.btScanAnother.setOnClickListener(new View.OnClickListener() {
             public void onClick(@Nullable View view) {

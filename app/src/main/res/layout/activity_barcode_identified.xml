@@ -15,16 +15,18 @@
     <ImageView
         android:id="@+id/patient_image"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="18dp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_hooray"
+        android:layout_height="0dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/member_name"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/include3"
+        app:layout_constraintTop_toBottomOf="@+id/include3"
+        app:layout_constraintVertical_bias="1.0"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/tv_hooray"
+        android:id="@+id/member_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -43,8 +45,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/number"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
-        app:layout_constraintTop_toBottomOf="@+id/tv_hooray" />
+        app:layout_constraintStart_toStartOf="@+id/member_name"
+        app:layout_constraintTop_toBottomOf="@+id/member_name" />
 
     <TextView
         android:id="@+id/patient_number"
@@ -54,7 +56,7 @@
         android:layout_marginTop="8dp"
         android:text="Number"
         app:layout_constraintStart_toEndOf="@+id/patient_number_key"
-        app:layout_constraintTop_toBottomOf="@+id/tv_hooray" />
+        app:layout_constraintTop_toBottomOf="@+id/member_name" />
 
     <TextView
         android:id="@+id/HouseholdId_key"
@@ -63,7 +65,7 @@
         android:layout_marginTop="8dp"
         android:text="Household"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/patient_number" />
 
     <TextView
@@ -83,7 +85,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/gender"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/HouseholdId_key" />
 
     <TextView
@@ -104,7 +106,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/date_of_birth"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/MemberGender_key" />
 
     <TextView
@@ -124,7 +126,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/subscription_date"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/MemberDateOfBirth_key" />
 
     <TextView
@@ -144,7 +146,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/subscription_duration"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/CurrentSubscriptionDate_key" />
 
 
@@ -168,7 +170,7 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/SubscriptionDuration_key" />
 
 
@@ -182,7 +184,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/SubscriptionDuration_key" />
 
     <Button

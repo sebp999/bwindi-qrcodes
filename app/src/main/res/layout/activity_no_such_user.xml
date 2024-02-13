@@ -16,14 +16,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="18dp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_hooray"
+        app:layout_constraintBottom_toTopOf="@+id/member_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include3"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/tv_hooray"
+        android:id="@+id/member_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -42,8 +42,8 @@
         android:layout_marginTop="8dp"
         android:text="Number"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
-        app:layout_constraintTop_toBottomOf="@+id/tv_hooray" />
+        app:layout_constraintStart_toStartOf="@+id/member_name"
+        app:layout_constraintTop_toBottomOf="@+id/member_name" />
 
     <TextView
         android:id="@+id/membershipNum"
@@ -53,7 +53,7 @@
         android:layout_marginTop="8dp"
         android:text="Number"
         app:layout_constraintStart_toEndOf="@+id/patient_number_key"
-        app:layout_constraintTop_toBottomOf="@+id/tv_hooray" />
+        app:layout_constraintTop_toBottomOf="@+id/member_name" />
 
 
     <TextView
@@ -63,7 +63,7 @@
         android:layout_marginTop="8dp"
         android:text="Date of Birth"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/patient_number_key" />
 
     <TextView
@@ -85,7 +85,7 @@
         android:text="@string/barcode_identified_nbut_member_not_in_database"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/tv_hooray"
+        app:layout_constraintStart_toStartOf="@+id/member_name"
         app:layout_constraintTop_toBottomOf="@+id/MemberDateOfBirth" />
 
 

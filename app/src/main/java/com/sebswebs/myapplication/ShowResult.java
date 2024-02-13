@@ -15,6 +15,7 @@ import android.view.View;
 
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.preference.PreferenceManager;
 
@@ -25,24 +26,27 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import androidx.appcompat.widget.Toolbar;
 
-public final class ShowResult extends AppCompatActivity {
+public final class ShowResult extends BaseMenus {
     private ActivityBarcodeIdentifiedBinding binding;
 
     private boolean subscriptionExpired(String startDate, String duration) {
         LocalDate date = LocalDate.parse(startDate);
-        long numDays = Long.parseLong(duration);
-        LocalDate now = LocalDate.now();
-        return date.plusDays(numDays).isBefore(now);
+        date = date.plusMonths(Integer.parseInt(duration)).minusDays(1);
+        return date.isBefore(LocalDate.now());
     }
 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+
+
         this.binding = ActivityBarcodeIdentifiedBinding.inflate(this.getLayoutInflater());
 
         this.setContentView((View) binding.getRoot());
@@ -52,24 +56,10 @@ public final class ShowResult extends AppCompatActivity {
         try {
             if (barcodeInfo != null) {
                 barcodeParts = Arrays.asList(barcodeInfo.split(","));
-                if (barcodeParts.size()!=3) {
-                    final Snackbar snack = Snackbar.make(findViewById(R.id.updatedText), (CharSequence) ("This bar code looks wrong: it should have 3 items but it has "+barcodeParts.size()), Snackbar.LENGTH_INDEFINITE);
-                    snack.setAction(
-                            "ok",
-                            new View.OnClickListener(){
-                                @Override public void onClick(View view){
-                                    snack.dismiss();
-                                    switchToMain();
-                                }
-                            }).show();
-
-                }
             } else {
-                Log.e("xxxx", "No data from bar code ?!");
                 return;
             }
         } catch (NullPointerException noDataFromBarcode) {
-            Log.e("xxxx", "No data from bar code ?!");
             return;
         }
 
@@ -80,7 +70,7 @@ public final class ShowResult extends AppCompatActivity {
         PatientDbHelper databaseHelper = new PatientDbHelper(this);
         SQLiteDatabase database = databaseHelper.getReadableDatabase();
         String[] cols = {"MemberId", "HouseholdId", "Client_Name", "MemberGender", "MemberDateOfBirth", "CurrentSubscriptionDate", "SubscriptionDuration", "MemberImagePath"};
-        Cursor result = database.query("patient", cols, "MemberId='" + barcodePatientId + "'", null, null, null, null);
+        Cursor result = database.query("patient", cols, "MemberId='" + barcodePatientId + "'", null, null, null, "SubscriptionDuration DESC");
         Log.e("result", result.getCount() + "");
         try {
             if (result.moveToFirst()) {
@@ -95,7 +85,7 @@ public final class ShowResult extends AppCompatActivity {
                 String subscriptionDuration = (result.getInt(6) + "");
                 String memberImagePath = result.getString(7);
 
-                this.binding.tvHooray.setText((CharSequence) clientName);
+                this.binding.memberName.setText((CharSequence) clientName);
                 this.binding.patientNumber.setText((CharSequence) memberId);
                 this.binding.HouseholdId.setText((CharSequence) householdId);
                 this.binding.MemberGenderId.setText((CharSequence) memberGender);
@@ -111,7 +101,7 @@ public final class ShowResult extends AppCompatActivity {
                 Bitmap image = get_image(memberId);
                 this.binding.patientImage.setImageBitmap(image);
             } else { // nothing in database
-                this.binding.tvHooray.setText(barcodeMemberName);
+                this.binding.memberName.setText(barcodeMemberName);
                 this.binding.patientNumber.setText(barcodePatientId);
 
                 this.binding.CurrentSubscriptionDate.setText("");
@@ -136,11 +126,13 @@ public final class ShowResult extends AppCompatActivity {
                 ShowResult.this.switchToMain();
             }
         });
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
     private Bitmap get_image(String memberId) {
 
-//        File primaryExternalStorage = this.getExternalMediaDirs()[0];
         File primaryExternalStorage = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File appImagesDir = new File(primaryExternalStorage, "members");
         File image = new File(appImagesDir, memberId+".jpg");
